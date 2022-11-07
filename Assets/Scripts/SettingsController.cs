@@ -20,7 +20,7 @@ public class SettingsController : MonoBehaviour
         SetAudioSettings();
     }
 
-    private void SetAudioSettings()
+    internal void SetAudioSettings()
     {
         _musicState = Convert.ToBoolean(PlayerPrefs.GetInt("Music"));
         _soundState = Convert.ToBoolean(PlayerPrefs.GetInt("Sound"));

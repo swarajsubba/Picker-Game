@@ -23,7 +23,7 @@ public class ScreenController : MonoBehaviour
     [SerializeField] private List<Screen> scenesList;
     [SerializeField] private GameObject backbutton;
     public static ScreenController Instance { get; private set; }
-
+    public SettingsController settingsController;
     private void Awake()
     {
         // If there is an instance, and it's not me, delete myself.
@@ -38,6 +38,8 @@ public class ScreenController : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        settingsController.SetAudioSettings();
+
         if (_currentScreenId.Equals(ThisScreen.None))
             _currentScreenId = ThisScreen.Intro;
 

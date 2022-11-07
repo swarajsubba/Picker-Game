@@ -18,8 +18,8 @@ public class GameController : MonoBehaviour
     private readonly List<Gift> _giftsArray = new List<Gift>();
     private readonly List<int> _probArray = new() { 87, 10, 3, 0 };
     private readonly List<GameObject> _giftItemsList = new List<GameObject>();
-    [SerializeField] private List<Button> giftItembuttons = new List<Button>();
-    private int _numberOfPicksAvailable;
+    [SerializeField] private List<Button> giftItemButtons = new List<Button>();
+    [SerializeField] private int numberOfPicksAvailable;
 
     private EventSystem _eventSystem;
 
@@ -37,18 +37,8 @@ public class GameController : MonoBehaviour
     private void OnEnable()
     {
         UpdatePicksUI += UpdatePicksUIText;
-        foreach (var item in giftItembuttons)
+        foreach (var item in giftItemButtons)
             item.interactable = true;
-    }
-
-    void UpdatePicksUIText(int val = 0)
-    {
-        _numberOfPicksAvailable = PlayerPrefs.GetInt("Picks") + val;
-        PlayerPrefs.SetInt("Picks", _numberOfPicksAvailable);
-        picksInfoText.text = $"You have {_numberOfPicksAvailable} picks!";
-
-        ScreenController.Instance.freePicksTimer = _numberOfPicksAvailable.Equals(0);
-        ScreenController.Instance.TimeLeft = 60;
     }
 
     private void Awake() => _eventSystem = FindObjectOfType<EventSystem>();
@@ -67,16 +57,36 @@ public class GameController : MonoBehaviour
     }
 
     /// <summary>
+    /// Update ui elements
+    /// </summary>
+    /// <param name="val"></param>
+    void UpdatePicksUIText(int val = 0)
+    {
+        numberOfPicksAvailable = PlayerPrefs.GetInt("Picks") + val;
+        PlayerPrefs.SetInt("Picks", numberOfPicksAvailable);
+
+        picksInfoText.text = $"You have {numberOfPicksAvailable} picks!";
+
+        if (giftsOpened.Equals(8) && numberOfPicksAvailable > 0)
+        {
+            resetButton.SetActive(true);
+            Debug.Log("Requires reset");
+        }
+
+        ScreenController.Instance.freePicksTimer = numberOfPicksAvailable.Equals(0);
+        ScreenController.Instance.TimeLeft = 60;
+    }
+
+    /// <summary>
     /// Instantiate and set gift item variables
     /// </summary>
     /// <param name="parent"></param>
     public void OpenGift(Transform parent)
     {
         //return if no picks available
-        if (_numberOfPicksAvailable <= 0) return;
+        if (numberOfPicksAvailable <= 0) return;
 
-        //decrement count after every pick
-        //_numberOfPicksAvailable -= 1;
+        giftsOpened++;
 
         //just ui text update
         UpdatePicksUIText(-1);
@@ -125,16 +135,26 @@ public class GameController : MonoBehaviour
         _eventSystem.enabled = b;
     }
 
+    [SerializeField] private int giftsOpened;
+    [SerializeField] private GameObject resetButton;
+
     /// <summary>
     /// remove all the instantiate items when changing screens
     /// </summary>
-    private void ResetGiftsList()
+    public void ResetGiftsList()
     {
-        foreach (var item in _giftItemsList)
+        if (giftsOpened.Equals(8))
         {
-            Destroy(item);
+            giftsOpened = 0;
+            resetButton.SetActive(false);
         }
 
+        foreach (var item in _giftItemsList)
+            Destroy(item);
+
         _giftItemsList.Clear();
+
+        foreach (var item in giftItemButtons)
+            item.interactable = true;
     }
 }
